@@ -55,7 +55,7 @@ classdef RPM <handle
                     'position',[0.6 0.08 0.15 0.08], ...
                     'string','Stopped',...
                     'HorizontalAlignment','center',...
-                    'Fontsize',14); 
+                    'Fontsize',12); 
                 
       app.Sheet_Panel = uipanel(app.Figure,...
                     'units','normalized',...
@@ -117,15 +117,21 @@ classdef RPM <handle
    
         end
         function go(app,varargin)
-            app.begin = true;
+            app.begin = false;
             set(app.Status_Panel,'string','Running');
+            try
             s = serial(app.COMS{get(app.COM_Select,'Value')});
-            fopen(s)
+            fopen(s);
+            catch
+                set(app.Status_Panel,'string','No Connection');
+                return
+                
+            end
             pause(.5);
             run = true;
-            
+            N = 0
             while (run==true) %Inside will run until stop is pressed
-                out = fscanf(s)
+                out = fscanf(s);
                 [first,last] = strtok(out,':');
                 if first == 'M'
                     try
@@ -138,7 +144,7 @@ classdef RPM <handle
 
                     [mph,~] = strtok(last,':');
                     mph = str2double(mph);
-                    app.datamph(1+length(datamph)) = mph ;
+                    app.datamph(1+length(app.datamph)) = mph ;
                 elseif first == 'R'
                     try
                         if firsttimeinR == 1
@@ -149,11 +155,12 @@ classdef RPM <handle
                     end
                     [rpm,~] = strtok(last,':');
                     rpm = str2double(rpm);                   
-                    app.datarpm(1+length(datarpm)) = rpm;
+                    app.datarpm(1+length(app.datarpm)) = rpm;
                                                          
                 end
-                app.begin
-                if app.begin == false;
+                
+                pause(.01)
+                if app.begin == true;
                     run = false;
                 end
               
@@ -166,9 +173,9 @@ classdef RPM <handle
             set(app.xlsx_selected,'string',app.csvfile);
         end
         function Stop(app,varargin)
+            app.begin = true;
             set(app.Status_Panel,'string','Stopped')
             pause(.2)
-            app.begin = false;
         end
         function closeApp(app,hObjectm,eventdata)
             delete(app.Figure)
