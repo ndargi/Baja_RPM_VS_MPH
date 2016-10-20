@@ -21,6 +21,7 @@ classdef RPM <handle
         COMS
         datamph
         datarpm
+        totaldata
     end
     methods
         function app = RPM
@@ -129,7 +130,7 @@ classdef RPM <handle
             end
             pause(.5);
             run = true;
-            N = 0
+            
             while (run==true) %Inside will run until stop is pressed
                 out = fscanf(s);
                 [first,last] = strtok(out,':');
@@ -172,10 +173,22 @@ classdef RPM <handle
             app.csvfile = sprintf('%s.xlsx',app.csvfile);
             set(app.xlsx_selected,'string',app.csvfile);
         end
-        function Stop(app,varargin)
+        function Stop(app,varargin)       
+          
+            X = linspace(1,length(app.datarpm),length(app.datarpm));
+            Y = linspace(1,length(app.datamph),length(app.datamph));
             app.begin = true;
             set(app.Status_Panel,'string','Stopped')
             pause(.2)
+            app.totaldata
+            plot(X,app.datarpm,Y,app.datamph)
+            if length(app.datamph)>length(app.dataprm)
+                app.datarpm(length(app.datarpm)+1:length(app.datamph)) = 0
+            else
+                app.datamph(length(app.datamph)+1:length(app.datarpm)) = 0
+            end
+            app.totaldata = [app.datamph;app.datarpm];
+             xlswrite(app.csvfile,app.totaldata,app.Sheet_string);
         end
         function closeApp(app,hObjectm,eventdata)
             delete(app.Figure)
