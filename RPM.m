@@ -19,9 +19,13 @@ classdef RPM <handle
         initial
         csvfile
         COMS
+        datamph
+        datarpm
     end
     methods
         function app = RPM
+            app.datamph = [];
+            app.datarpm = [];
             app.COMS = {'COM1','COM2','COM3','COM4','COM5','COM6','COM7','COM8'};
         app.Figure = figure('units','normalized',...
                 'position',[.3 .3 .4 .5],...
@@ -116,10 +120,38 @@ classdef RPM <handle
             app.begin = true;
             set(app.Status_Panel,'string','Running');
             s = serial(app.COMS{get(app.COM_Select,'Value')});
+            fopen(s)
             pause(.5);
             run = true;
             
             while (run==true) %Inside will run until stop is pressed
+                out = fscanf(s)
+                [first,last] = strtok(out,':');
+                if first == 'M'
+                    try
+                      if firsttimeinM == 1
+                        firsttimeinM = 2;
+                    else
+                        stop(timer1)
+                      end
+                    end
+
+                    [mph,~] = strtok(last,':');
+                    mph = str2double(mph);
+                    app.datamph(1+length(datamph)) = mph ;
+                elseif first == 'R'
+                    try
+                        if firsttimeinR == 1
+                        firsttimeinR = 2;
+                        else
+                        stop(timer2)
+                        end
+                    end
+                    [rpm,~] = strtok(last,':');
+                    rpm = str2double(rpm);                   
+                    app.datarpm(1+length(datarpm)) = rpm;
+                                                         
+                end
                 app.begin
                 if app.begin == false;
                     run = false;
