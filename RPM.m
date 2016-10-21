@@ -21,6 +21,7 @@ classdef RPM <handle
         COMS
         datamph
         datarpm
+        sheetname
         totaldata
     end
     methods
@@ -118,6 +119,7 @@ classdef RPM <handle
    
         end
         function go(app,varargin)
+            app.sheetname = get(app.Sheet_string,'string');
             app.begin = false;
             set(app.Status_Panel,'string','Running');
             try
@@ -180,15 +182,14 @@ classdef RPM <handle
             app.begin = true;
             set(app.Status_Panel,'string','Stopped')
             pause(.2)
-            app.totaldata
-            plot(X,app.datarpm,Y,app.datamph)
-            if length(app.datamph)>length(app.dataprm)
+            plotyy(X,app.datarpm,Y,app.datamph)
+            if length(app.datamph)>length(app.datarpm)
                 app.datarpm(length(app.datarpm)+1:length(app.datamph)) = 0
             else
                 app.datamph(length(app.datamph)+1:length(app.datarpm)) = 0
             end
             app.totaldata = [app.datamph;app.datarpm];
-             xlswrite(app.csvfile,app.totaldata,app.Sheet_string);
+             xlswrite(app.csvfile,app.totaldata,app.sheetname);
         end
         function closeApp(app,hObjectm,eventdata)
             delete(app.Figure)
